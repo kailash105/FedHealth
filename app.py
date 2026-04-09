@@ -87,7 +87,7 @@ def show_home():
             st.session_state['page'] = 'Train Model'
             st.rerun()
     with col2:
-        if st.button("📊 View Results", use_container_width=True):
+        if st.button("📊 View Results", use_container_width=True, disabled=not st.session_state.get('model_trained', False)):
             st.session_state['page'] = 'Results Dashboard'
             st.rerun()
 
@@ -289,6 +289,7 @@ def show_train_model():
             time.sleep(0.3)
             
         st.success("✅ Federated Training Completed!")
+        st.session_state['model_trained'] = True
 
 def show_training_logs():
     st.title("📝 Training Logs & Audit")
@@ -327,14 +328,24 @@ st.sidebar.markdown("---")
 if 'dataset_uploaded' not in st.session_state:
     st.session_state['dataset_uploaded'] = False
 
+if 'model_trained' not in st.session_state:
+    st.session_state['model_trained'] = False
+
 if 'page' not in st.session_state:
     st.session_state['page'] = 'Home'
+
+nav_options = ["Home", "Train Model"]
+if st.session_state.get('model_trained', False):
+    nav_options.extend(["Results Dashboard", "Client Analysis", "Training Logs"])
+
+if st.session_state['page'] not in nav_options:
+    st.session_state['page'] = "Home"
 
 # Set up the radio button based on session state, but also update session state when it changes
 selected_page = st.sidebar.radio(
     "Navigation",
-    ["Home", "Train Model", "Results Dashboard", "Client Analysis", "Training Logs"],
-    index=["Home", "Train Model", "Results Dashboard", "Client Analysis", "Training Logs"].index(st.session_state['page'])
+    nav_options,
+    index=nav_options.index(st.session_state['page'])
 )
 
 # Update session state based on sidebar selection
